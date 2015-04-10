@@ -1,0 +1,101 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr 09 13:42:26 2015
+
+@author: OctaviousB
+"""
+
+from sympy import*
+from numpy import*
+from control import*
+import matplotlib.pylab as plt
+
+s = Symbol('s')
+
+# we now considere the disturbance process described by:
+
+Gs = (200/(10*s+1))*(1/(0.05*s+1)**2)
+Gds = (100/(10*s+1))
+
+disp(expand(Gs))
+disp(expand(Gds))
+
+#numerator
+
+num1 = [200]
+num2 = [100]
+
+#denominator
+
+den1 = [0.025, 1.0025, 10.1, 1]
+den2 = [10, 1]
+
+tf1 = tf(num1, den1)
+tf2 = tf(num2, den2)
+
+G = tf1
+Gd = tf2
+
+# gain and phase plots
+
+linsys = G
+
+omega = None
+dB = False
+Hz = False
+deg = True
+Plot = True
+
+#bode_plot(linsys, omega, dB, Hz, plot)
+
+# refference tracking
+wc =  10
+r  = 1
+d = 1
+
+Knum = (wc*(10*s+1)*(0.1*s+1))
+Kden = (s*200*(0.01*s+1))
+
+disp(expand(Knum))
+disp(expand(Kden))
+
+num3 = [10, 101, 10]
+den3 = [2, 200, 0]
+
+tf3 = tf(num3, den3)
+
+Kc = tf3
+T =  G*Kc*((1+G*Kc)**-1)
+S = (1+G*Kc)**-1
+yr = T*r
+yd = S*Gd*d
+
+# Step response
+# Parametres
+sys = yr           # LTI system to simulate
+t = linspace(0,3.5)         # Time vector (argument is autocomputed if not given)
+x0 = 0.0          # Initial condition (default = 0)
+input = 0         # Index of the input that will be used in this simulation
+output = 0        # Index of the output that will be used in this simulation.
+transpose = False # If True, transpose all input and output arrays
+
+# Simulating and plotting the results
+subplot(1,2,1)
+t, yout = step_response(sys, t, x0, input, output, transpose)
+plt.plot(t, yout)
+legend('r')
+
+# Step response
+# Parametres
+sys = yd           # LTI system to simulate
+t = linspace(0,3.5)         # Time vector (argument is autocomputed if not given)
+x0 = 0.0          # Initial condition (default = 0)
+input = 0         # Index of the input that will be used in this simulation
+output = 0        # Index of the output that will be used in this simulation.
+transpose = False # If True, transpose all input and output arrays
+
+# Simulating and plotting the results
+subplot(1,2,2)
+t, yout = step_response(sys, t, x0, input, output, transpose)
+plt.plot(t, yout)
+legend('d')
