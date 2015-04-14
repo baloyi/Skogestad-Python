@@ -1,0 +1,122 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 14 06:43:43 2015
+
+@author: OctaviousB
+"""
+
+from sympy import*
+from numpy import*
+from control import*
+import matplotlib.pylab as plt
+
+s = Symbol('s')
+
+# we now considere the disturbance process described by:
+
+Gs = (200/(10*s+1))*(1/(0.05*s+1)**2)
+Gds = (100/(10*s+1))
+
+#disp(expand(Gs))
+#disp(expand(Gds))
+
+#numerator
+
+num1 = [200]
+num2 = [100]
+
+#denominator
+
+den1 = [0.025, 1.0025, 10.1, 1]
+den2 = [10, 1]
+
+tf1 = tf(num1, den1)
+tf2 = tf(num2, den2)
+
+G = tf1
+Gd = tf2
+
+# disturbance tracking
+wc =  10
+
+d = 1
+
+Knum = (wc*(10*s+1)*(0.1*s+1))
+Kden = (s*200*(0.01*s+1))
+
+#disp(expand(Knum))
+#disp(expand(Kden))
+
+num3 = [1, 2]
+den3 = [1, 0]
+
+num4  = [0.05, 1]
+den4 = [0.005, 1]
+
+tf3 = tf(num3, den3)
+tf4 = tf(num4, den4)
+
+Kc1 = 0.5
+Kc2 = Kc1*tf3
+Kc3 = Kc2*tf4
+ 
+S1 = (1+G*Kc1)**-1
+yd1 = S1*Gd*d
+ 
+S2 = (1+G*Kc2)**-1
+yd2 = S2*Gd*d 
+ 
+S3 = (1+G*Kc3)**-1
+yd3 = S3*Gd*d 
+ 
+# gain and phase plots
+
+L1 = G*Kc1
+L2 = G*Kc2
+L3 = G*Kc3
+
+linsys = L1, L2, L3
+
+omega = None
+dB = False
+Hz = False
+deg = True
+Plot = True
+ 
+# Step response
+# Parametres
+sys1 = yd1           # LTI system to simulate
+t1 = linspace(0,3.5)         # Time vector (argument is autocomputed if not given)
+x0 = 0.0          # Initial condition (default = 0)
+input = 0         # Index of the input that will be used in this simulation
+output = 0        # Index of the output that will be used in this simulation.
+transpose = False # If True, transpose all input and output arrays
+
+sys2 = yd2           # LTI system to simulate
+t2 = linspace(0,3.5)         # Time vector (argument is autocomputed if not given)
+x0 = 0.0          # Initial condition (default = 0)
+input = 0         # Index of the input that will be used in this simulation
+output = 0        # Index of the output that will be used in this simulation.
+transpose = False # If True, transpose all input and output arrays
+
+sys3 = yd3           # LTI system to simulate
+t3 = linspace(0,3.5)         # Time vector (argument is autocomputed if not given)
+x0 = 0.0          # Initial condition (default = 0)
+input = 0         # Index of the input that will be used in this simulation
+output = 0        # Index of the output that will be used in this simulation.
+transpose = False # If True, transpose all input and output arrays
+
+#Simulating and plotting the results
+#subplot(1,2,1)
+
+t1, yout1 = step_response(sys1, t1, x0, input, output, transpose)
+t2, yout2 = step_response(sys2, t2, x0, input, output, transpose)
+t3, yout3 = step_response(sys3, t3, x0, input, output, transpose)
+
+fig, axes = plt.subplots(figsize=(7,5))
+bode_plot(linsys, omega, dB, Hz, plot) 
+legend(["L1","L2","L3"])
+
+fig, axes = plt.subplots(figsize=(7,5))
+plt.plot(t1, yout1,t2,yout2,t3,yout3)
+legend(["y1","y2","y3"])
